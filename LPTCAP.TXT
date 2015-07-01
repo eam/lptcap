@@ -1,0 +1,1215 @@
+
+
+				     LPTCAP
+
+
+		       PARALLEL PRINT DATA CAPTURE SYSTEM
+
+
+	(c) Copyright 1996-2000 K. Heidenstrom (k@heidenstrom.gen.nz)
+
+
+                      LPTCAP release 1c, 02 April 2000
+
+      ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+      ³ If you have a web browser such as Netscape or Internet Explorer ³
+      ³ you should view the HTML version of this document (LPTCAP.HTM). ³
+      ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+1  Introduction
+---------------
+
+LPTCAP is a hardware and software solution which allows an IBM-compatible PC
+running MS-DOS to capture print data sent by another PC, or any device with a
+Centronics parallel printer interface.
+
+It is mainly intended to allow PC-based capturing of data from 'closed' systems
+such as obsolete word processors which use incompatible disks or disk formats,
+so that the old equipment can be thrown out, or microcontroller-based embedded
+systems, where the only way to access the data externally is via the unit's
+printer port, to eliminate paper printouts and/or add processing capabilities.
+
+The LPTCAP system is not a product you can buy.  The software is provided in
+this package, and may be used in any personal or commercial application.  The
+hardware (the LPTCAP adapter) can be constructed by anyone with basic practical
+electronic construction skills, and is documented in full in this package.
+Parts cost is about US $20 excluding the case and cables.  The author does not
+sell the adapter as a kit or product.
+
+The LPTCAP system consists of a hardware adapter box called the LPTCAP adapter,
+and associated support software.  The LPTCAP adapter box has two connectors:
+
+  ş CN1 - a female 36-pin Centronics connector, and
+  ş CN2 - a male 25-pin D-sub connector.
+
+CN1 is physically and electrically similar to the Centronics connector on a
+parallel printer, and connects to the device which is sending printer data
+(known as the Sender) via the cable that would normally be used to connect
+the Sender to a Centronics parallel printer.
+
+Data from the Sender is latched in the adapter, and can be captured by a PC
+(called the Capture PC) which is connected to CN2 (male 25-pin D-sub).
+The connection between CN2 and the Capture PC is through a short pin-to-pin
+cable which connects CN2 to a parallel printer port on the Capture PC.  The
+Capture PC controls and interrogates the LPTCAP adapter through this cable.
+
+The basic functions performed by the LPTCAP adapter are:
+
+     ş	Provide electrical compatibility with the Sender and the Capture PC,
+     ş	Capture parallel data from Sender and allow Capture PC to read captured
+	data via a standard parallel port in either polled or interrupt mode,
+     ş	Provide timed Acknowledgement pulse generation,
+     ş	Allow the Capture PC to monitor commands from the sender,
+     ş	Allow the Capture PC to provide statuses to the sender.
+
+The support software runs on the Capture PC.  It consists of the LPTCAP software
+module which is included in the LPTCAP package in source (assembly language) and
+object form, to be linked into other programs.	This module provides LPTCAP
+auto-detection, testing and capturing functions which are easy to use.
+
+A small exerciser program called LPTEST (which uses the LPTCAP software module)
+is also included.  This program performs tests and simple capturing functions.
+This program is included in source (Borland C) and executable forms, and can be
+used as a starting point for other programs, or for basic capturing functions.
+
+Capturing can be done in polled mode, or interrupt-driven mode if the Capture
+PC's parallel port has interrupt capability.  Interrupt-driven mode may be more
+convenient and/or efficient than polled mode in some applications, but is not
+required to prevent data overrun (as with serial communication, for example),
+because the Centronics electrical protocol requires an explicit handshake on
+each character.  The LPTCAP adapter provides the handshaking signals and thus
+prevents data overrun.
+
+1.1  Boring Legal Stuff
+-----------------------
+
+The LPTCAP hardware and software was designed and developed by the author,
+Kris Heidenstrom.  The LPTCAP package, including the hardware design, support
+software and documentation, is (c) Copyright 1996-2000 by K. Heidenstrom.
+
+My philosophy is that this package should be freely available to anyone who
+wants to use it, and that no-one should deny this to anyone else.  By 'freely
+available' I mean easily available and with no specific charge apart from any
+normal data or disk charges.
+
+You can use the hardware design and the support software freely in any personal
+or commercial application.  You can distribute the software, in its complete
+and unmodified form only, as long as the author is identified, the package is
+identified as free and no specific charge (other than data charges or disk
+duplication) is made for it.
+
+You are welcome to build LPTCAP adapters (the hardware part of the package) and
+sell them, but you must clearly identify the designer, and state that the
+hardware design and support software are freely available and that the potential
+buyer could get the design details for free and build the device him/herself.
+
+You may not distribute the LPTCAP package in an altered or incomplete form.
+Please distribute only the original archive file.
+
+If you generate a freely distributable derived version of the design or code
+such as a DOS protected-mode version or a version for a different operating
+system, please include a note that your code was derived from mine, and please
+consider sending me a copy of your package.
+
+I provide no warranty that the LPTCAP code and the LPTCAP design will perform
+to any standard or at all.  This is because I cannot control the environment in
+which you use the software and the hardware design.  Any use of the LPTCAP
+system is entirely at your own risk.  If this is not acceptable to you, then
+do not use the LPTCAP package.
+
+You should also check section 4.1, Caveats, for notes on the limitations of the
+design.
+
+I have tested the design thoroughly and I believe that it is sound.  If you
+have a problem with the LPTCAP design, please let me know and I will try to
+help.  You can contact me at:
+
+	Internet:	k@heidenstrom.gen.nz		(preferred)
+	Snail:		Kris Heidenstrom
+			c/- P.O Box 27-103
+			Wellington
+			New Zealand
+	Phone:		Work: +64 4 385-6611
+			Home: +64 4 475-7437
+			(We are 12 hours ahead of GMT.)
+
+Please feel free to contact me via email, or to send a postcard to the snail
+mail address above if you find the LPTCAP system useful.
+
+1.2  Versions
+-------------
+
+Version 1 - released 20 December 1997
+
+	Original release
+
+Version 1a - released 28 March 1998
+
+	Correction to setup procedure - in the second stage when measuring
+	across R1 and adjusting for half resistance, I had said to measure
+	between U2 pin 8 and U1 pin 11 - the correct pins are U2 pin 8 and
+	U1 pin 5. Thanks to Jay Pennell (jpennell@seanet.com) of Penntronics
+	for finding this error.
+
+Version 1b - released 28 July 1998
+
+	Correction to layout illustration to add connection points to CN1 pin
+	10 and CN2 pin 11, and change to the construction procedure to state
+	that there are thirteen wires from the board to each connector
+	including grounds.  Thanks to Peter Scales (peter@sleepy.demon.co.uk)
+	for reporting these errors.
+
+Version 1c - released 02 April 2000
+
+	Changed email address from kheidens@clear.net.nz to k@heidenstrom.gen.nz
+
+2  LPTCAP Adapter Hardware
+--------------------------
+
+The hardware design is provided in this package as a schematic diagram (circuit
+diagram) and a stripboard layout diagram.
+
+The schematic diagram is given in the file LPTCAP-S.GIF.  This is a little too
+large to display properly on-screen and should be printed if possible.  Note
+that on the schematic, U1 is shown as six discrete components, named U1A to
+U1F.
+
+The stripboard layout is given in the file LPTCAP-L.GIF.  This view shows the
+adapter board looking down from above.	See section 2.2 for more information.
+Important note - there were two errors in the layout drawing which are fixed
+in release 1b - connections to CN1 pin 10 and CN2 pin 11 were not marked on
+previous versions.
+
+2.1  Parts List
+---------------
+
+The following parts list for the LPTCAP adapter excludes parallel cables.
+
+Qty  Refs	Description
+
+3    C1-3	0.1uF 50V ceramic or monolithic capacitor
+1    C4		10uF 10V tantalum capacitor
+2    C5,6	470pF 50V ceramic capacitor
+3    C7-9	100pF 50V ceramic capacitor
+1    CN1	Female 36-pin Centronics connector, chassis mount
+1    CN2	Male 25-pin D-sub connector, chassis mount
+2    R1,2	50 kilohm preset potentiometer (trimpot)
+2    RSIL1,2	Single-in-line resistor network, 9-pin, 8-element, 100 kilohm
+1    JP1	3-pin jumper block or single-pole changeover switch (see below)
+1    U1		74HC14 integrated circuit - hex Schmitt trigger inverter
+1    U2		74HC74 integrated circuit - dual D-type flip-flop
+1    U3		74HC165 integrated circuit - serial-output shift register
+1		Jumper shunting block for JP1
+2		14-pin DIP IC socket, dual-wipe (for U1 and U2)
+1		16-pin DIP IC socket, dual-wipe (for U3)
+1		Piece of stripboard - 25 tracks by 20 holes
+1		Plastic or metal case
+2		Screws, nuts and lockwashers for mounting CN1
+2		Hexagonal tapped-head screws with nuts and lockwashers for CN2
+5m		Hookup wire (stranded, insulated)
+2m		Solder
+
+Notes:
+
+	All of the above parts should be readily available from electronic
+	hobbyist shops such as Radio Shack or the local equivalent.
+
+	R1 and R2 are 50 kilohm preset potentiometers (trimpots).  These are
+	screwdriver-settable devices which are adjusted in the adjustment
+	procedure.  Single-turn or ten-turn types are both suitable.
+
+	JP1 is listed as a three-pin jumper strip with a jumper shunt.	This
+	jumper selects the interrupt polarity, which may be different for
+	different Capture PCs.	If the LPTCAP adapter will regularly be used
+	with several different Capture PCs, it may be worthwhile connecting a
+	single-pole changeover (SPCO) switch such as a small slide switch or
+	toggle switch, instead of the jumper, so that the interrupt polarity
+	can be selected without opening the adapter case.
+
+	U1-3 must be 74HCnn types.  74nn (TTL), 74LSnn, 74ACTnn and 74HCTnn
+	types are NOT suitable.  Typical manufacturers are Motorola, Philips,
+	National Semiconductor, Harris and Texas Instruments.  Use DIP (dual
+	in-line package) devices, not surface-mount (SOIC) devices (surface
+	mount devices do not go well with stripboard).
+
+	U1-3 are static sensitive devices.  Keep them in their anti-static
+	tubes until you are ready to use them.
+
+2.2  Construction
+-----------------
+
+The LPTCAP adapter circuit is constructed on a rectangular piece of stripboard.
+A printed circuit board could be designed, but these are uneconomical except in
+large quantities, and would still require wire links (unless a double-sided PCB
+was used, but these are even more expensive).  The assembled board is connected
+to connectors CN1 and CN2 (and a switch connected to the JP1 position, if a
+switch is used) with hookup wire, and the unit is mounted in a plastic or metal
+case.  Cutouts and holes for the connectors must be made in the case.  This is
+easier with a plastic case than with a metal case.
+
+In addition to files and a drill, you will need pliers, side cutters, soldering
+iron (or a 'soddering iron' if you're American :-) and a small screwdriver.
+During testing and adjustment, a multimeter (analogue or digital) is required.
+
+The file LPTCAP-L.GIF contains a drawing of the stripboard layout.  This view
+is drawn looking down onto the adapter board from above.  The copper strips are
+shown in grey, with gaps indicating cuts where appropriate.  Coloured numbers
+refer to pins on CN1 (red numbers) and CN2 (blue numbers).
+Important note - there were two errors in the layout drawing which are fixed
+in release 1b - connections to CN1 pin 10 and CN2 pin 11 were not marked on
+previous versions.
+
+Here is the full detailed construction procedure.
+
+    1.	Drill and file holes in the case, to suit CN1 and CN2 (and the switch,
+	if you are using one).	If possible, arrange things so that you will be
+	able to wire the connectors to the stripboard before mounting them on
+	the case.  If you mount the connectors against the outside of the case,
+	you won't be able to push them through the apertures from the inside
+	after they have been wired up, so you would have to bring the wires
+	through the connector apertures when wiring the connectors up to the
+	stripboard.  If the case is in two halves, you can make the apertures
+	open to the edge of one half, to avoid this problem.
+
+    2.	Cut the stripboard to size and make the 31 cuts in the copper strips,
+	using a quarter-inch drill bit or a proper stripboard cutting tool.
+	Just cut deep enough to remove the copper, don't drill through the
+	board.	The cut positions are indicated by gaps in the grey strips in
+	the drawing.
+
+    3.	Install the three IC sockets - these will act as position references.
+	Don't insert the ICs yet.
+
+    4.	Install the link wires.  These are shown as black lines joining two
+	points.  Many of these are straight horizontal links, and uninsulated
+	wire can be used for these (if you use stranded wire, twist it tight).
+	For the other links, use insulated stranded hookup wire.
+
+    5.	Install capacitors C1-9.  C1-3 are not shown in the drawing - solder
+	these on the underside of the board, under U1, U2 and U3 respectively,
+	across the VCC and GND pins (the corner pins - pins 14 and 7 for U1 and
+	U2, and pins 16 and 8 for U3).	Use lengths of insulation (taken from
+	hookup wire) on the leads, so they cannot touch other pins or tracks.
+
+	C4 is polarised.  If the polarity is not marked on the body, the longer
+	lead is normally positive.  C5-9 are not polarised.
+
+    6.	Install R1, R2 and JP1.  If you are using a switch instead of a jumper
+	to set the IRQ polarity, solder three lengths of hookup wire instead of
+	JP1, and take these to the IRQ polarity switch.  Make sure that the
+	middle pin of the switch connects to the middle pin of the JP1 marking
+	on the drawing.
+
+    7.	Solder resistor networks RSIL1 and RSIL2 directly to connectors CN1 and
+	CN2 respectively.  The resistor networks will have a dot or similar
+	mark at the pin 1 end.	Pin 1 does not connect to the connector, but
+	all other pins do (they connect to pins 2 to 9 of the connector).
+
+    8.	Make the connections from CN1 and CN2 to the stripboard, using lengths
+	of insulated stranded hookup wire.  Connection points for these wires
+	are indicated by red and blue numbers on the drawing.  Red indicates a
+	wire to a pin on CN1, and blue indicates a wire to a pin on CN2 (as
+	mentioned in the drawing).
+
+	Ground (common) on CN1 and CN2 must be connected to the stripboard
+	positions marked 'GND' in red and blue.  For CN1, connect together pins
+	16, 17, 19-30 and 33 and the shield, and wire to the stripboard.
+	For CN2, connect together pins 18-25 and the shield, and wire to the
+	stripboard.
+
+	There are a total of 13 wires from CN1 to the stripboard, and 13 wires
+	from CN2 to the stripboard, including the 'GND' wires.
+
+    9.	Using hookup wire, connect pin 1 of RSIL1 and pin 1 of RSIL2 to the
+	stripboard positions marked 'RSIL1' and 'RSIL2'.
+
+   10.	Connect the following pins of CN1 and CN2 together using hookup wire.
+	These signals go directly between the two connectors, not via the
+	stripboard.
+
+		CN1 pin		CN2 pin
+		-------		-------
+		13 ------------ 6
+		14 ------------ 14
+		31 ------------ 16
+		32 ------------ 5
+		36 ------------ 17
+
+   11.	Insert the ICs.
+
+   12.	Place the stripboard in the case (if the case is metal, use corrugated
+	cardboard or similar, glued to the case, to insulate it from the bottom
+	of the board) and mount the connectors.
+
+2.3  Adapter Adjustment And Testing Procedure
+---------------------------------------------
+
+The adjustment procedure sets the timing of the Acknowledge pulse and the BUSY
+latch reset using trimpots R1 and R2 on the LPTCAP adapter.  You will need a
+digital or analogue multimeter.
+
+The LPTEST program (included in the LPTCAP package) is required, to generate
+timed signals during adjustment.  Use the 'generate adjustment signal' option
+and enter a blank test duration (the adjustment signal will stop when you press
+the Ctrl key).
+
+Disconnect the Sender cable from CN1.  Connect the multimeter negative lead to
+the common rail of the LPTCAP adapter (the connector shields are connected to
+the common rail).  Start the adjustment signal using the LPTEST program.
+With the adjustment signal running, measure the voltage on VCC (pin 14 of U1).
+This voltage should be stable, and between 3V and 5V.  Note the actual voltage
+measured.
+
+With the adjustment test still running, measure the voltage on pin 9 of U2 and
+adjust trimpot R2 for a voltage of 14% of the VCC voltage measured earlier.
+For example if VCC is 4.0V, adjust R2 until you measure 0.56V on U2 pin 9.
+
+With the adjustment test still running, measure the voltage on pin 3 of U2.
+Rotate trimpot R1 to each end of its travel.  At one end, the voltage should
+be nearly zero, and at the other end the voltage should be about 0.5V (the
+exact value is not important).	The end where voltage is present is the minimum
+resistance end.  Turn R1 to this end, and rotate R1 slowly towards the other
+end.  The voltage should drop steadily, until a point is reached where the
+voltage suddenly jumps to zero (or nearly zero).  Leave R1 at this position.
+
+Unplug CN2 to power down the adapter, and remove U1 from its socket.  Connect
+the multimeter between pin 5 of U1's socket and pin 8 of U2 (i.e. across R1)
+and note the reading, then rotate R1 towards the minimum resistance end until
+its resistance is half of this value.
+
+Replace U1, reconnect CN2, run the LPTEST diagnostic test and check that the
+tests pass.
+
+Optionally, temporarily connect a 68 ohm resistor from VCC to ground, measure
+the VCC rail (should be around 2-3 volts) and repeat the diagnostic test - it
+should pass.
+
+A data transfer test requires a second PC, to act as the Sender.  Run the
+PRNFILE.COM program (included in the package) on both machines to generate a
+one megabyte file called PRNFILE.OUT containing pseudo-random data.  Run the
+capture software and start capturing to a file, then on the Sender, enter the
+command COPY /B PRNFILE.OUT PRN.  You can measure the time taken to transfer
+the file and calculate the throughput if you wish.  When the file has been
+transferred, use a file-compare program such as DOS's COMP to compare the
+captured file with PRNFILE.OUT on the Capture PC.  If the files do not match,
+see section 4.1 for suggestions.
+
+2.4  Signal Naming Conventions
+------------------------------
+
+LPTCAP documentation and comments in source code use signal names as marked on
+the LPTCAP schematic.  The Capture PC's parallel port is not used for printing,
+so most of its standard signal names are not meaningful.  Therefore, the signal
+lines on the Capture PC's parallel port are assigned names (such as -DACK and
+SDI) according to their function when used with the LPTCAP adapter.  Signals
+from the Sender are named using the standard convention, since these signals
+are used for their normal purposes.
+
+The four control signals (-INIT, -SELECT, -AUTOFEED and -STROBE) are connected
+directly from the Sender's port to the same signals on the Capture PC, so they
+are named identically on both CN1 and CN2.
+
+2.5  LPTCAP Adapter Technical Description
+-----------------------------------------
+
+The adapter is controlled and powered by signals from the Capture PC.  When
+data lines from the Capture PC (pins 2-9 of CN2) are high, input protection
+diodes in U1, U2 and U3 conduct and provide operating voltage for the circuit.
+This is why the default state for the Capture PC's data register is 11111111b.
+C4 acts as a reservoir for the supply rail and provides current for U1-3 when
+they switch (change state).
+
+The LPTCAP adapter contains one 74HC14 hex Schmitt inverter chip (U1) which
+is used to invert various signals and clean up slow signal transitions from
+the parallel ports, one 74HC74 dual flip-flop (U2) which detects and latches
+data bytes from the Sender and generates Acknowledge pulses, and one 74HC165
+parallel/serial-input, serial-output shift register (U3) which loads and holds
+each captured data byte and passes it serially to the Capture PC.
+
+These devices must be 74HC types.  Other types with compatible pinouts, such
+as 74LS and 74HCT, should not be used.
+
+The default state of the adapter is with U2A in the reset state, i.e. U2 pin
+6 high and the +-DRDY signal line in the inactive state (whether this is high
+or low depends on the setting of the IRQ Polarity switch or jumper).
+In this state, assuming that -RESETB is inactive (high), the adapter is ready
+to accept a data byte from the Sender machine.
+
+When the Sender wishes to send a byte, it asserts the data value on D0-7 and
+then briefly pulses -STROBE active (low).  This causes the BUSY latch (U2A)
+to flip to the set state, giving a BUSY indication back to the Sender, and
+switches the shift register (U3) from transparent load mode to shift mode,
+latching the data byte into the shift register in the process.	The +-DRDY line
+goes active, indicating to the Capture PC that a data byte has been captured
+and generating a parallel port interrupt on the Capture PC if the interrupt is
+enabled and the port is interrupt capable.
+
+The LPTCAP adapter will remain in the 'busy' state until the Capture PC detects
+and acknowledges the new data.	In this state, the Sender cannot send a new data
+byte, because BUSY is active and no -ACK pulse has been sent by the adapter.
+
+When the Capture PC detects that new data is ready, via the +-DRDY line, either
+by polling the line or through the parallel port interrupt, it can read the data
+serially via the SDI and -SDI signals (-SDI is always the complement of SDI),
+using the -SCL signal to clock the data through U3.  Initially when a data byte
+is captured, bit 0 is present on SDI.  On every falling edge of -SCL from the
+Capture PC, the data shifts through the shift register by one bit, shifting new
+data in from the SDO line (which is used in the diagnostic test but not during
+normal operation) and presenting the next data bit of the captured byte on SDI
+and -SDI.
+
+Once the Capture PC has read the data byte, it brings -DACK low, clocking a '1'
+into U2B and starting a pulse on the -ACK line back to the Sender (and to the
+Capture PC on the -ACKP line).	Approximately 5 microseconds (set by R1 and C5)
+after the start of this pulse, U2A's clock goes high and U2A is reset (assuming
+that -STROBE from the sender is high, which it should be).  Approximately 10
+microseconds (set by R2 and C6) after the start of the -ACK pulse, U2B resets,
+ending the -ACK pulse.
+
+The -RESETB signal is provided to allow the Capture PC to reset U2A without
+generating an -ACK pulse, and is used only during initialisation of the LPTCAP
+adapter.  The 74HC74 device responds in a defined way when its set and reset
+inputs are both active (low) - both the Q and Q-bar outputs are forced high.
+With U2A, only the Q-bar output is used, so the reset input (from -RESETB) has
+priority over the set input (from -STROBE).  Therefore, if -RESETB is active
+(low), U2A will be in a known state regardless of the state of -STROBE.  This
+is important because the Capture PC cannot guarantee that -STROBE will be high
+(inactive) - it may be being driven active by the Sender.  By forcing -STROBE
+low itself, the Capture PC can control U2A's Q-bar output via -RESETB.
+
+The DDATA signal feeds the Data input of the acknowledge pulse flip-flop and
+should be held at logic '1' at all times.  It has no practical purpose except
+to provide another source of supply current for the adapter.
+
+The following diagram shows a typical data byte capture.
+
+	ÄÄÂÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+D0-7	  ³Data³ Undefined (don't-care)
+	ÄÄÁÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+	ÄÄÄÄ¿ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+-STROBE     ³³
+	    ÀÙ
+	    ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+BUSY	    ³				    ³
+	ÄÄÄÄÙ				    ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+	ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿Ú¿Ú¿Ú¿Ú¿Ú¿Ú¿ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+-SCL			³³³³³³³³³³³³³³
+			ÀÙÀÙÀÙÀÙÀÙÀÙÀÙ
+	ÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÂÄÂÄÂÄÂÄÂÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+SDO	    ³data bit 0 ³1³2³3³4³5³6³7
+	ÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÁÄÁÄÁÄÁÄÁÄÁÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+	ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+-DACK					³³
+					ÀÙ
+	ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿	ÚÄÄÄÄÄÄÄÄÄÄÄ
+-ACK					³	³
+					ÀÄÄÄÄÄÄÄÙ
+
+2.6  Parallel Port Registers On The Capture PC
+----------------------------------------------
+
+The tables in the following sections give the I/O assignment for the Capture
+PC's parallel port, with standard parallel port functions given in parentheses.
+
+In these tables, the '!' symbol indicates that the PC's parallel port circuitry
+inverts the data between the register and the hardware signal, i.e. a bit value
+of '1' in the register corresponds to an electrically low signal and vice versa.
+The '-' symbol indicates that the signal is electrically active-low, i.e. it
+is active or 'true' when it is electrically low.
+
+Therefore a signal name which starts with '-' or '!' (but not both) is in its
+active state when the register bit is 0, and a signal name with both '!' and
+'-', or neither, is in its active state when the register bit is 1.
+
+The polarity of +-DRDY depends on the setting of the IRQ Polarity jumper (JP1)
+or switch on the LPTCAP adapter.  See section 2.6.2 for details.
+
+2.6.1  Data Register
+--------------------
+
+Data register: LPTBase+0, read/write, driven by software
+
+7 6 5 4 3 2 1 0
+* . . . . . . .  (D7)  DDATA	 Should always be held at '1'
+. * . . . . . .  (D6)  -RESETB	 Set to 0 to hold BUSY latch clear
+. . * . . . . .  (D5)  -NOPAPER  Set to 0 to signal PAPER OUT to sender
+. . . * . . . .  (D4)  SELCTD	 Set to 1 to signal SELECTED to sender
+. . . . * . . .  (D3)  -ERROR	 Set to 0 to signal ERROR to sender
+. . . . . * . .  (D2)  -DACK	 Normally 1, 1-to-0 edge acknowledges data byte
+. . . . . . * .  (D1)  -SCL	 Normally 1, 1-to-0 edge clocks shift register
+. . . . . . . *  (D0)  SDO	 Drives serial data input of shift register
+
+2.6.2  Status Register
+----------------------
+
+Status register: LPTBase+1, read-only, driven by hardware, read by software
+
+7 6 5 4 3 2 1 0
+* . . . . . . .  (!BUSY)    !-ACKP   Pulses to 1 when we acknowledge data
+. * . . . . . .  (-ACK)     +-DRDY   New data ready (see explanatory, below)
+. . * . . . . .  (NOPAPER)  SDI      Carries serial data from shift register
+. . . * . . . .  (SELCTD)   -SDI     Carries inverted shift register data
+. . . . * . . .  (-ERROR)   LOOPIN   Driven from bit 0 of data register
+. . . . . * * *			     Undefined
+
+The +-DRDY signal on status register bit 6 indicates whether new data is ready.
+Status register bit 6 (the -ACK input of the parallel port) is the input which
+is fed to the IRQ line when the buffer is enabled.  On some older machines, the
+IRQ is triggered on the falling edge of this signal line, but on most machines,
+the IRQ is triggered on the rising edge.  To support both port types, the LPTCAP
+adapter has an IRQ Polarity switch or jumper (JP1), which feeds either a true
+signal or an inverted signal onto this line.  The meaning of +-DRDY for each
+position of this switch or jumper is:
+
+	JP1 position		Meaning of bit 6 of status register
+	------------		-----------------------------------
+	Negative IRQ		Normally 1; 0 means new data is ready;
+	Positive IRQ		Normally 0; 1 means new data is ready.
+
+2.6.3  Control Register
+-----------------------
+
+Control register: LPTBase+2, read/write, driven by hardware and software
+
+7 6 5 4 3 2 1 0
+* * * . . . . .			Not used in this application
+. . . * . . . .			Interrupt Enable (1 = enable)
+. . . . * . . .  !-SELECT	Will be 1 if Sender is asserting -SELECT
+. . . . . * . .  -INITIALIZE	Will be 0 if Sender is asserting -INITIALIZE
+. . . . . . * .  !-AUTOFEED	Will be 1 if Sender is asserting -AUTOFEED
+. . . . . . . *  !-STROBE	Will be 1 if Sender is asserting -STROBE
+				Can also be driven to 1 to trigger a Strobe.
+
+The control register is used in a slightly unusual way.  The electrical signal
+lines driven by this port are all open-collector with pullup resistors.  This
+allows these signal lines to be used as inputs if the drivers are set to the
+electrical high state.	In this state, the pullup resistors pull the lines up
+to electrical high, but the lines can be pulled to electrical low by the Sender.
+Reading the control register yields the actual line states, so this port can be
+used as an input port in this application.
+
+Because control register bits 0, 1 and 3 have inversion between the register
+bits and the signal lines, a value of xxxx0100 binary must be written to the
+control register to set the drivers to electrical high.  This will appear as
+xxxx0100 binary when reading the control register.  If the Sender drives any
+of those signals to electrical low, the corresponding bit(s) in the control
+register will change to the opposite state.
+
+This software can cause a data strobe to occur explicitly by setting and then
+clearing bit 0 of the control register.  When this bit is set, the port output
+forces the -STROBE signal line to electrical low, causing a data strobe on the
+adapter even if the Sender is not driving -STROBE low.
+
+3  LPTCAP Software Module
+-------------------------
+
+The LPTCAP software module is included in this package in source (LPTCAP.ASM)
+and object forms.  It provides a set of functions which can be called from a
+C or assembly-language program, which interface with the LPTCAP adapter and
+provide standard auto-detection, diagnostic and data capture capabilities.
+
+3.1  Assembly Time Settings
+---------------------------
+
+There are two assembly-time settings for the LPTCAP software module - memory
+model and slow-timing.	These are controlled by constants which are defined on
+the assembler command line.  These constants are:
+
+	TINY		Selects tiny memory model
+	SMALL		Selects small memory model
+	COMPACT		Selects compact memory model
+	MEDIUM		Selects medium memory model
+	LARGE		Selects large memory model
+	HUGE		Selects huge memory model
+
+	SLOW		Selects slow timing
+	VERYSLOW	Selects very slow timing
+
+These constants are defined on the assembler command-line with the '/dname'
+option.  For example, to specify large model and slow timing, the command line
+to the assembler (TASM or MASM) should include: /dLARGE /dSLOW.
+
+A memory model should be specified.  If no memory model is specified, during
+assembly the module issues a warning message and the module defaults to SMALL
+model.
+
+The SLOW and VERYSLOW options may be useful during development.  The VERYSLOW
+setting should not be used when generating production code.  If neither SLOW
+nor VERYSLOW are specified, the module will be assembled for standard timing.
+
+Refer to the comments in LPTCAP.ASM for more detailed information on the memory
+model support and the slow timing settings.
+
+3.2  Functions Provided
+-----------------------
+
+The following functions are provided in the LPTCAP software module:
+
+lptcap_version()		Returns version numbers and assembly settings
+lptcap_port()	**		Detects LPTCAP adapter(s) on parallel ports
+lptcap_test()	**		Diagnostics - logic and data loopthrough tests
+lptcap_test_fail_data()		Returns details of a diagnostic check failure
+lptcap_adjust()			Generates timed signals for adapter adjustment
+lptcap_get_cont()		Returns states of control signals from Sender
+lptcap_set_stat()		Sets states of printer status signals to Sender
+lptcap_send_ack()		Sends an acknowledgement to the Sender
+lptcap_poll_new()		Tests whether a new character has been captured
+lptcap_next_char()		Returns the next captured character
+lptcap_wait_char()		Waits (with or without timeout) for a character
+lptcap_autodetect_irq()		Auto-detects the IRQ number of the LPTCAP port
+lptcap_intmode_install()	Installs interrupt-driven capture mode
+lptcap_intmode_uninstall()	Uninstalls interrupt-driven capture mode
+
+** The functions lptcap_port() and lptcap_test() set up global variables which
+   are used by other functions, and must be called and return a successful
+   result before other functions are used.
+
+The code in the LPTCAP module manipulates the interrupt flag extensively.  All
+functions return with the interrupt flag unmodified.  Functions do not lock
+interrupts out for more than about 50 microseconds at one time (any operations
+which take longer than this are split into blocks, with the interrupt flag
+restored to its initial between the blocks) except for lptcap_adjust() which
+locks interrupts out for about 5 milliseconds at a time.  Some functions
+explicitly enable interrupts temporarily during their execution.
+
+3.3  Individual Function Descriptions
+-------------------------------------
+
+3.3.1  lptcap_version()
+-----------------------
+
+unsigned int lptcap_version(int request)
+
+This function returns version-related information, according to the 'request'
+parameter.  Values for the 'request' parameter are:
+
+    0	LPTCAP_REQ_MAJVER	Returns major version number
+    1	LPTCAP_REQ_MINVER	Returns minor or sub-version number
+    2	LPTCAP_REQ_MODVER	Returns modification or sub-sub-version number
+    3	LPTCAP_REQ_FILREV	Returns file revision number
+    4	LPTCAP_REQ_DATEL	Returns low word of YYYYMMDD value
+    5	LPTCAP_REQ_DATEH	Returns high word of YYYYMMDD value
+    6	LPTCAP_REQ_CONDS	Returns a bitstring indicating conditional
+				assembly-time parameters (see below).
+
+For a request parameter of LPTCAP_REQ_CONDS, the function returns an unsigned
+integer which is bit-allocated as follows:
+
+F E D C B A 9 8 7 6 5 4 3 2 1 0
+* * * * * * * * * * * * . . . .  Reserved for future use
+. . . . . . . . . . . . * . . .  Module was made with VERYSLOW option
+. . . . . . . . . . . . . * . .  Module was made with SLOW option
+. . . . . . . . . . . . . . * .  Module made for far data (0 = near)
+. . . . . . . . . . . . . . . *  Module made for far code (0 = near)
+
+3.3.2  lptcap_port()
+--------------------
+
+int lptcap_port(int findmode)
+
+This function detects and returns the LPT port number of the LPTCAP port.
+It accepts a 'findmode' parameter which specifies the search type desired:
+
+    0	LPTCAP_FIND_SAME	Return previously-found LPTCAP port
+    1	LPTCAP_FIND_FIRST	Look for LPTCAP port starting from LPT1
+    2	LPTCAP_FIND_NEXT	Find next LPTCAP port after last found port
+
+This function is able to find more than one LPTCAP port, though no other
+functions support capturing from more than one LPTCAP adapter simultaneously.
+
+This function returns the LPTx number of the port where the LPTCAP adapter was
+found, in the range 1 to 4, or 0 if it could not find any port (or any MORE
+ports, if findmode was LPTCAP_FIND_NEXT).
+
+Once a parallel port with an LPTCAP adapter is found, this function initialises
+the parallel port's control register and outgoing status lines, and the port
+becomes the LPTCAP port used by the other functions in this module.
+
+This function sets up several port-related global variables within this module
+which are used by other functions.  IT MUST BE CALLED AND RETURN A SUCCESSFUL
+RESULT BEFORE OTHER FUNCTIONS IN THIS MODULE WILL WORK.
+
+This function should not be called while LPTCAP is capturing data as it will
+disturb the capturing process.
+
+This function detects the LPTCAP adapter via the LOOPOUT and LOOPIN signals.
+It does not perform any diagnostic check on the port, so it should not disturb
+any printers or other standard parallel peripherals that may be connected to
+ports as the ports are checked.
+
+Ports are located through the BIOS parallel port base address table in low
+memory.  This means that LPTCAP will respect any parallel port reassignments
+that have been made during or after boot-up via the BIOS parallel port table
+(this does not include reassignments from parallel to serial ports made via
+MODE), and will support parallel ports at non-standard addresses provided that
+they have been detected by the BIOS or by program executed during or after
+boot-up, and that they are compatible or backward-compatible with standard PC
+parallel ports in hardware and software.
+
+3.3.3  lptcap_test()
+--------------------
+
+int lptcap_test(unsigned int ntests)
+
+This function performs diagnostic tests on the LPTCAP adapter.	IT MUST BE
+CALLED AND RETURN A SUCCESSFUL RESULT BEFORE OTHER FUNCTIONS IN THIS MODULE
+WILL WORK.  The test consists of a basic presence detection, followed by a
+test loop consisting of a logic test and a data loopthrough test, which is
+repeated according to the ntests parameter.
+
+The basic presence detection uses the loopback signal to check that the LPTCAP
+adapter is present, and determines the setting of the IRQ Polarity switch or
+jumper (JP1) on the LPTCAP adapter.
+
+The logic test checks the operation of the data capture flip-flop and the data
+acknowledge flip-flop.	The data loopthrough test checks the shift register by
+shifting data values of 0, 0xFF, 0x55 and 0xAA through it.
+
+The test takes approximately 0.4 milliseconds to 2 milliseconds (depending on
+the speed of the Capture PC) multiplied by the ntests value (longer if the
+SLOW or VERYSLOW parameters were used when LPTCAP was assembled).
+
+If a test fails, the hardware is set to its default state and lptcap_test()
+stops testing and returns the error number.
+
+If this function is called while interrupt-driven receive mode is enabled
+(via lptcap_intmode_install()) it will return LPTCAP_ADAPTER_INTMODE and
+will not perform any logic or data tests.
+
+This function should not be called while LPTCAP is capturing data as it will
+disturb the capturing process.	It should not be called while the Sender is
+trying to send data.  This means that any capture program should perform its
+initial setup and tests BEFORE the Sender is instructed to send data.
+
+Return values are:
+
+    0	LPTCAP_ADAPTER_PRESENT	Adapter present and working normally
+    1	LPTCAP_ADAPTER_NO_PORT	No parallel port has been selected
+    2	LPTCAP_ADAPTER_MISSING	Adapter is not attached
+    3	LPTCAP_ADAPTER_INTMODE	System is running in interrupt-driven mode
+    4	LPTCAP_ADAPTER_NO_DRDY	Adapter failed to activate +-DRDY signal
+    5	LPTCAP_ADAPTER_ACKSTUK	Adapter -ACKP is stuck in active state
+    6	LPTCAP_ADAPTER_NO_DACK	Adapter failed to activate -ACKP signal
+    7	LPTCAP_ADAPTER_ACKLONG	Adapter -ACKP pulse too long
+    8	LPTCAP_ADAPTER_BSYSTUK	Adapter indicated BUSY active after -ACK pulse
+    9	LPTCAP_ADAPTER_STRSTUK	-STROBE line stuck low (see notes below)
+   10	LPTCAP_ADAPTER_SDISERR	Adapter SDI and -SDI states inconsistent
+   11	LPTCAP_ADAPTER_DATAERR	Data loopthrough error (see notes below)
+
+All non-zero values indicate a problem with the LPTCAP adapter or the parallel
+port of the Capture PC, except return codes LPTCAP_ADAPTER_BSYSTUK and
+LPTCAP_ADAPTER_STRSTUK, which may indicate that the Sender is already trying
+to send data when lptcap_test() is called, or possibly that the Sender is
+faulty or is connected but powered off.
+
+For a return value of LPTCAP_DATAERR, the byte values that were sent and
+received in the data loopthrough test that failed are available through the
+lptcap_test_fail_data() function and may be displayed in the error message
+to possibly help a user to diagnose the problem.
+
+This function temporarily uses timer channel 2 for timeout checking.  This
+may interfere with any background sound generation or timing that is being
+done by other parts of the program using timer channel 2.
+
+3.3.4  lptcap_test_fail_data()
+------------------------------
+
+unsigned int lptcap_test_fail_data(void)
+
+This function returns an unsigned integer which is comprised of the 'sent' value
+(in the low byte) and the 'received' value (in the high byte) from the data
+loopthrough test that failed, when lptcap_test() returns an error code of
+LPTCAP_ADAPTER_DATAERR.  This may be displayed as part of the failure report
+message if desired.
+
+3.3.5  lptcap_adjust()
+----------------------
+
+void lptcap_adjust(unsigned int ticks)
+
+This function generates a pattern of accurately timed signals which are used
+during adjustment of the LPTCAP adapter.  See section 2.3 for details.
+
+The 'ticks' parameter specifies the duration of the test.  One timer tick is
+approximately 55 milliseconds, so one second is about 18 ticks and one minute
+is about 1092 ticks.  If a zero 'ticks' parameter is supplied, lptcap_adjust()
+will generate the test signal until the user presses the Ctrl key.
+
+This function may be used even if lptcap_test() has not been called, or when
+lptcap_test() returned an error code.  This is because it may be necessary to
+adjust the LPTCAP adapter before lptcap_test() will report success.
+
+This function should not be called while LPTCAP is capturing data as it will
+disturb the capturing process.	If it is called when the LPTCAP system is
+operating in interrupt-driven receive mode (via lptcap_intmode_install())
+it will return without generating any adjustment signal.
+
+This function temporarily uses timer channel 2 for timekeeping.  This may
+interfere with any background sound generation or timing that is being done
+by other parts of the program using timer channel 2.
+
+3.3.6  lptcap_get_cont()
+------------------------
+
+unsigned int lptcap_get_cont(void)
+
+This function returns the states of the control lines provided by the Sender
+at the time the function is called.  The return value is bit-allocated:
+
+7 6 5 4 3 2 1 0
+* * * * . . . * 	    Reserved for future use
+. . . . * . . .  SELECT	    signal from Sender; 1 = active
+. . . . . * . .  INITIALIZE signal from Sender; 1 = active
+. . . . . . * .  AUTOFEED   signal from Sender; 1 = active
+
+3.3.7  lptcap_set_stat()
+------------------------
+
+void lptcap_set_stat(unsigned int stat_word)
+
+This function sets the printer status signals which are returned to the Sender,
+according to the stat_word parameter which is bit-allocated:
+
+7 6 5 4 3 2 1 0
+* * . . . * * *  Reserved for future use; should be 0
+. . * . . . . .  PAPER OUT signal to Sender; 1 = paper out
+. . . * . . . .  NOTSELCTD signal to Sender; 1 = not selected
+. . . . * . . .  ERROR	   signal to Sender; 1 = error
+
+The default and initial values for these signals are the '0' values, which are
+'normal' (i.e. "no-error") values.  This function need not be used in normal
+circumstances, since the outgoing signals are set to their default values when
+lptcap_port() is called.
+
+3.3.8  lptcap_send_ack()
+------------------------
+
+void lptcap_send_ack(void)
+
+This function sends an acknowledgement signal to the Sender, consisting of
+-ACK going low, BUSY going inactive, then -ACK rising again.  This may be
+required if the Sender does not receive an acknowledgement for some reason
+and gets stuck waiting for it.
+
+3.3.9  lptcap_poll_new()
+------------------------
+
+int lptcap_poll_new(void)
+
+This function tests whether a new character has been captured and is available.
+It returns 0 if not, or 1 if so.  It does not return the character value, and
+does not remove the character from the buffer.
+
+This function behaves differently in polled and interrupt-driven modes.
+In polled mode, it examines the +-DRDY signal from the LPTCAP adapter directly
+to see whether a new character has been captured.  In interrupt-driven mode, it
+examines the receive buffer pointers to determine whether there is any unread
+data in the buffer.  Also, in interrupt-driven mode, it checks and corrects a
+condition where a character has been received but the interrupt was lost.
+This condition could occur when this software is used with badly behaved TSRs.
+It does not result in loss of data.
+
+3.3.10	lptcap_next_char()
+--------------------------
+
+int lptcap_next_char(void)
+
+This function returns the next character which has been captured and is
+available, or returns an indication that there is no data available.
+
+If no character is available, this function returns -1 immediately.
+
+If a character is available, this function acknowledges the character and
+removes it from the buffer, and returns the character value, which will be
+in the range 0 to 255.
+
+In polled mode, this function examines the LPTCAP adapter directly, and in
+interrupt-driven mode, it examines the buffer pointers and checks for missed
+interrupts - see notes on lptcap_poll_new() for details.
+
+3.3.11	lptcap_wait_char()
+--------------------------
+
+int lptcap_wait_char(unsigned int timeout_ticks)
+
+This function waits for a character to be received, and returns the character
+value.	If the timeout_ticks parameter is non-zero, it will implement a timeout
+check, and if no character is received within the timeout period, it returns a
+value of -1.  The timeout value is in units of one timer tick, or about 55
+milliseconds.  A zero timeout value will give an infinite timeout.  Because
+timer ticks are not synchronised to the function call, the actual time before
+a timeout is reported may be up to one tick longer than the specified value.
+
+In polled mode, this function examines the LPTCAP adapter directly, and in
+interrupt-driven mode, it examines the buffer pointers and checks for missed
+interrupts - see notes on lptcap_poll_new() for details.
+
+3.3.12	lptcap_autodetect_irq()
+-------------------------------
+
+int lptcap_autodetect_irq(unsigned int irqmask)
+
+This function attempts to auto-detect the IRQ (interrupt request) number
+associated with the LPTCAP port.  It returns a value from 2 to 15 indicating
+the IRQ number, or one of these error indications:
+
+    0	LPTCAP_IRQ_NONE		No associated IRQ detected
+   -1	LPTCAP_IRQ_INVERTED	IRQ polarity was incorrect
+   -2	LPTCAP_IRQ_SEVERAL	More than one IRQ detected
+
+If lptcap_autodetect_irq() returns LPTCAP_IRQ_NONE or LPTCAP_IRQ_SEVERAL,
+interrupt-driven capture (if enabled) will probably fail to work properly.
+A return value of LPTCAP_IRQ_INVERTED means that the IRQ Polarity switch or
+jumper on the LPTCAP adapter must be changed to the other position.  When
+this has been done, lptcap_test() must be called to detect the new state of
+this switch/jumper, then lptcap_autodetect_irq() may be called again.
+
+Any other value indicates a valid and correct IRQ number that is associated
+with the LPTCAP port.  On PC and PC/XT machines the IRQ number will be in the
+range 2-7.  On the AT and later machines the IRQ will be in the range 3-15
+excluding 8 and 13.
+
+If interrupt-driven capturing is not required, there is no need to call this
+function at all.
+
+This function does not enable the interrupt (except briefly during its testing),
+and does not install the LPTCAP interrupt-driven receiver.
+
+The irqmask parameter is a bitstring which specifies which IRQs are to be
+tested.  Most interrupt-capable parallel ports are wired to IRQ7 or IRQ5, and
+some may be jumper-selectable to other IRQs.  Bits 0 to 15 of the irqmask
+parameter correspond to IRQs 0 to 15, and a 1-bit enables testing of that IRQ.
+Therefore a typical value for irqmask is 0x00A0, allowing IRQs 5 and 7 to be
+tested, though any value, including 0xFFFF, can also be used.
+
+Some IRQs are not available on the slot bus, and these are not tested by this
+function even if enabled in irqmask.  On PC and PC/XT machines, IRQs 2-7 are
+available on the slot bus (IRQ0 and IRQ1 are used on the motherboard).	On AT
+and later machines, IRQs 3-7, 9-12, 14 and 15 are available on the slot bus
+(IRQ0, IRQ1, IRQ8 and IRQ13 are used on the motherboard and IRQ2 doesn't exist).
+
+This function will probably fail on MicroChannel machines (IBM PS/2).  It will
+also probably fail if used in a DOS compatibility box within a multi-process
+operating system such as Windows 3.x, Windows 95, Windows NT, OS/2 or Linux.
+
+Many soundcards use IRQ7.  If the sound card has not been initialised, its
+IRQ line driver may be in the high-impedance state and the parallel port may
+be able to use the IRQ line.  However, software that uses the sound card (such
+as Windows or game software) may leave the buffer enabled, and this may prevent
+the parallel port IRQ from working after these programs have been run.
+
+This function should not be called while LPTCAP is capturing data as it will
+disturb the capturing process.
+
+3.3.13	lptcap_intmode_install()
+--------------------------------
+
+int lptcap_intmode_install(unsigned int irqnum, lptcap_bufdescriptor * bdp)
+
+This function installs and enables interrupt-driven reception for the LPTCAP
+system.  In interrupt-driven mode, reception of a character by the LPTCAP
+adapter causes an interrupt, which causes the CPU to read the character and
+place it in a circular buffer or 'queue' for later processing.  Interrupt-
+driven mode is not necessary in order to keep up with the data rate or to avoid
+data loss, but it may make a program easier to write, and may improve the
+maximum data transfer speed if the capture software is doing a lot of other
+things as well as capturing the data.
+
+The function returns 1 if successful, or 0 if there is a problem with the
+irqnum parameter and interrupt mode has not been installed.
+
+The irqnum parameter specifies the IRQ (interrupt request) number to be used.
+The range of acceptable values depends on the type of machine on which the
+software is running.  On a PC or PC/XT, allowed irqnum values are 2, 3, 4,
+5, 6, 7.  On an AT or later machine, allowed irqnum values are 3, 4, 5, 6,
+7, 9, 10, 11, 12, 14, 15.
+
+The LPTCAP port IRQ number can be determined by calling lptcap_autodetect_irq()
+but some parallel ports do not have interrupt capability, in which case
+interrupt-driven receive mode will not work.
+
+This function does not attempt to confirm that the specified interrupt request
+line is associated with the LPTCAP port, nor that the port is interrupt capable,
+nor that the interrupt line is not in use by some other peripheral.
+
+The bdp parameter must point to an lptcap_bufdescriptor structure (see the
+typedef in LPTCAP.H), which is formatted as follows:
+
+	volatile unsigned int tail_index; /* Tail (index into buffer) */
+	unsigned int head_index;	/* Head (index into buffer) */
+	unsigned int buf_size;		/* Size of buffer in bytes */
+	unsigned char * buf_base;	/* Pointer to base of buffer */
+
+Memory for the buffer descriptor and the buffer area must be allocated by the
+calling program.  The caller must provide the buf_base and buf_size parameters
+in the descriptor structure; this function provides initial values for
+tail_index and head_index (both 0).
+
+The maximum buffer size is limited to 65535 bytes, even in the 'huge' memory
+model, because the buf_size is a word (16-bit).	The maximum number of data
+bytes that can be held in the buffer is one less than the buffer size.
+
+The calling program may remove data from the buffer manually, by manipulating
+the head_index value, or it may use the lptcap_poll_new(), lptcap_next_char()
+and lptcap_wait_char() functions.
+
+Enabling interrupt-driven receive mode causes the behaviour of the character
+input functions (lptcap_poll_new(), lptcap_next_char() and lptcap_wait_char())
+to change - they use the interrupt-driven receive buffer, instead of going
+direct to the LPTCAP adapter hardware.
+
+The interrupt line associated with the LPTCAP parallel port can be found by
+lptcap_autodetect_irq().  If an incorrect interrupt number is chosen, data
+capture may appear to work (because software will capture data in polled mode
+if the interrupt handler is not activated properly), but throughput will be
+reduced.
+
+Using lptcap_port() to change to a different port while interrupt-driven
+capturing is installed will cause strange behaviour, so don't do it!
+
+If a program uses interrupt-driven capture mode, steps must be taken to ensure
+that lptcap_intmode_uninstall() is called before the program terminates.  This
+may involve a critical error handler and/or a Ctrl-Break handler, since either
+of these conditions can usually terminate a DOS application without allowing it
+to clean up.  If this occurs, the interrupt vector is left pointing to code in
+the LPTCAP module which could be overwritten when another program is run, which
+would cause a system crash.
+
+3.3.14	lptcap_intmode_uninstall()
+----------------------------------
+
+void lptcap_intmode_uninstall(void)
+
+This function uninstalls interrupt-driven receive mode, disables the parallel
+port interrupt and returns the LPTCAP system to polled mode.  Any data in the
+circular buffer when this function is called is lost.
+
+lptcap_intmode_uninstall() uses DOS function 0x25 (set interrupt vector) and
+therefore must not be called when DOS is in an unstable state (for example,
+from within an interrupt handler).
+
+This function must be called prior to termination of the program.  If not, the
+interrupt handler will be left installed and this can cause a system crash.
+
+4  Application Information
+--------------------------
+
+4.1  Caveats
+------------
+
+The LPTCAP software is written for real-mode DOS, and will not work correctly
+(probably not at all) under multi-tasking, hardware-abstracting operating
+systems such as Linux, OS/2 or any variety of Windows.	Plain old DOS (version
+2.0 or later) is required.  (The test program, LPTEST, may require DOS 3.x.)
+
+The LPTCAP software module cannot be used with a DOS extender.	It is written
+for real-mode only.  It could be adapted to work in protected mode.
+
+The LPTCAP system will run on any member of the IBM PC family, including the
+old PC and PC/XT, provided that it has a parallel port which is compatible (in
+hardware and software) with a standard parallel port or a PS/2 bidirectional
+parallel port.	It may or may not work with ECP and EPP ports.	If the parallel
+port is integrated into the motherboard, the BIOS Setup may provide a facility
+to set the parallel port's operating mode.
+
+The LPTCAP adapter has been tested with two parallel port dongles (hardware
+copy-protection devices) from different manufacturers and worked with both,
+but it is possible that some dongles will interfere with LPTCAP.
+
+Do not use the LPTCAP software on a machine which is running in slow mode (i.e.
+a machine which has a turbo switch which is set to 'slow').  This may cause
+lptcap_test() to occasionally report bogus LPTCAP_ADAPTER_NO_DACK failures.
+
+The LPTCAP hardware adapter is not heavily protected against electrical
+interference or damage due to common-mode or differential-mode surges being
+induced into the cables.  It is very important to follow these guidelines:
+
+     ş	Do not use the LPTCAP adapter in a harsh electrical environment.
+     ş	Make the cable from the LPTCAP adapter to the Capture PC as short
+	as possible.
+     ş	The cable to the Sender should also be as short as practical.
+     ş	Both cables should be screened if possible.
+     ş	Both cables MUST have electrical continuity between the connector
+	shields.  This is essential to help prevent damage to the ICs in
+	the LPTCAP adapter when cables are plugged in and unplugged.
+     ş	If electrical interference causes data corruption, ensure that both
+	data cables are screened, try powering the Sender and the Capture
+	PC from the same electrical outlet point, and try moving the suspected
+	interfering appliance(s) to a different outlet point.
+
+During testing, the prototype adapter performed well and was able to transfer
+one-megabyte pseudo-random data files without error.  However, the Centronics
+interface is susceptible to electrical interference, so if data accuracy is
+important, you should perform some testing by sending a known data file through
+the adapter and trying to induce interference in the following ways:
+
+     ş	For all cables and connectors, grasp and tug or jiggle the cable near
+	the connector,
+     ş	Test for poor connections in the LPTCAP adapter by repeatedly tapping
+	it sharply (e.g. with a piece of wood),
+     ş	Test susceptibility to electrical interference by switching nearby
+	appliances on and off repeatedly.
+
+If capturing is unreliable with certain Senders or Capture PCs, or certain
+combinations, try adding a 10 kilohm resistor between pins 4 and 14 of U2.
+
+4.2  Performance
+----------------
+
+The author's testing has used various PCs as the Sender but no other type of
+device.  The design is based on the Centronics interface documentation in the
+manuals for various parallel printers, so any unit that works with a normal
+Centronics parallel printer should work with the LPTCAP adapter.
+
+The LPTCAP system is not optimised for high throughput.  The hardware
+constraints of the standard parallel port severely limit the maximum data
+transfer rate, and software changes would make little difference to the
+throughput.
+
+Using the SLOW or VERYSLOW options when assembling the LPTCAP module will
+affect throughput.  SLOW will roughly halve throughput, and VERYSLOW will
+reduce throughput by a much greater amount (depending on the speed of the
+Capture PC).
+
+Throughput is limited by both the Sender and the Capture PC.  The Capture PC
+generally does more work than the Sender and needs to be fast if throughput is
+significant.  Prototype throughput test results were:
+
+	Sender			Capture PC		Throughput
+	------			----------		----------
+	100MHz Pentium		100 MHz Pentium		16100 bytes/sec
+	8 MHz XT		75 MHz Pentium		 6000 bytes/sec
+	75 MHz Pentium		8 MHz XT		 1400 bytes/sec
+
+These tests were done with standard timing (i.e. SLOW and VERYSLOW not used).
+
+Only the first line, using fast machines for both Sender and Capture PC, has
+a data transfer rate higher than 115200 bps (the maximum rate available on a
+standard PC serial port).
+
+Throughput in interrupt mode is generally slightly lower than polled mode,
+unless the software on the Capture PC is performing other tasks in addition
+to capturing data.
+
+5.  Summary
+-----------
+
+The LPTCAP system is an inexpensive and practical way to get data out of closed
+or proprietary systems, or capture real-time data from embedded controllers.
+
+The hardware can be built by anyone with some practical electronic construction
+experience.  The support software can be linked into user-written programs, or
+the test program can be used for one-off data capturing.
+
+The design has some limitations (generally these are inherent in the Centronics
+protocol), which are discussed in section 4.1.
+
+Anyone is free to use the LPTCAP system for their own personal or business
+purposes, provided that they don't deny others the same opportunity.  The
+design details and support software are freely available to any user.
+
+I hope you find the LPTCAP system useful.
+
+Kris Heidenstrom
+
+02 April 2000

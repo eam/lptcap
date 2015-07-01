@@ -1,0 +1,12 @@
+lptcap01.zip	Software, circuit and docs for print capture system
+
+Full information on a parallel print capture system that allows any
+PC running MS-DOS to capture print data from any device that prints
+to a Centronics printer. LPTCAP is an inexpensive and practical way
+to get data from closed or proprietary systems or capture real-time
+data from embedded controllers.  The archive includes schematic and
+layout drawings for the hardware adapter (approximate parts cost US
+$20), a linkable software module in source and object forms, a test
+and demonstration program in source  and executable forms, and full
+documentation on hardware construction and software usage.  Free.
+Release 01c, 02 Apr 2000.  Kris Heidenstrom, k@heidenstrom.gen.nz.
